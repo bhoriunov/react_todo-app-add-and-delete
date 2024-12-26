@@ -77,6 +77,7 @@ export const App: React.FC = () => {
       userId: USER_ID,
     };
 
+    setTempTodo(tempTodoItem);
     setNewTodo('');
     setIsLoading(true);
 
