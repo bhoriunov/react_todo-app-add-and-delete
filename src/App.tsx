@@ -21,7 +21,6 @@ export const App: React.FC = () => {
 
   useEffect(() => {
     const fetchTodos = async () => {
-      // setIsLoading(true);
       setError(null);
 
       try {
@@ -78,10 +77,9 @@ export const App: React.FC = () => {
       userId: USER_ID,
     };
 
-    setTempTodo(tempTodoItem);
-    setTodos(prev => [...prev, tempTodoItem]);
     setNewTodo('');
     setIsLoading(true);
+
     try {
       const newTodoData = await client.post<Todo>('/todos', {
         title: newTodo,
@@ -89,13 +87,10 @@ export const App: React.FC = () => {
         completed: tempTodoItem.completed,
       });
 
-      setTodos(prev =>
-        prev.map(todo => (todo.id === tempId ? newTodoData : todo)),
-      );
-      setTempTodo(null);
+      setTodos(prev => [...prev, newTodoData]);
     } catch {
-      setTodos(prev => prev.filter(todo => todo.id !== tempId));
       setError('Unable to add todo');
+      setTempTodo(null);
       inputRef.current?.focus();
     } finally {
       setIsLoading(false);
@@ -116,7 +111,6 @@ export const App: React.FC = () => {
   };
 
   const handleClearCompleted = async () => {
-    // const completedTodos = todos.filter(todo => todo.completed);
     const completedIds = todos
       .filter(todo => todo.completed)
       .map(todo => todo.id);
