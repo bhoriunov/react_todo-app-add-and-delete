@@ -6,6 +6,7 @@ import { UserWarning } from './UserWarning';
 import { getTodos, USER_ID } from './api/todos';
 import { Todo } from './types/Todo';
 import { client } from './utils/fetchClient';
+import classNames from 'classnames';
 
 export const App: React.FC = () => {
   const [todos, setTodos] = useState<Todo[]>([]);
@@ -92,12 +93,10 @@ export const App: React.FC = () => {
         prev.map(todo => (todo.id === tempId ? newTodoData : todo)),
       );
       setTempTodo(null);
-      // setTempTodo(null);
     } catch {
       setTodos(prev => prev.filter(todo => todo.id !== tempId));
       setError('Unable to add todo');
       inputRef.current?.focus();
-      // setTempTodo(prev => ({ ...prev!, error: true }));
     } finally {
       setIsLoading(false);
     }
@@ -167,9 +166,10 @@ export const App: React.FC = () => {
               <div
                 key={todo.id}
                 data-cy="Todo"
-                className={`todo ${todo.completed ? 'completed' : ''} ${
-                  loadingIds.includes(todo.id) ? 'loading' : ''
-                } item-enter-done`}
+                className={classNames('todo', {
+                  completed: todo.completed,
+                  loading: loadingIds.includes(todo.id),
+                })}
               >
                 <label className="todo__status-label">
                   <input
@@ -178,7 +178,6 @@ export const App: React.FC = () => {
                     className="todo__status"
                     checked={todo.completed}
                     disabled={loadingIds.includes(todo.id)}
-                    // readOnly
                   />
                 </label>
 
@@ -198,15 +197,17 @@ export const App: React.FC = () => {
 
                 <div
                   data-cy="TodoLoader"
-                  className={`modal overlay ${loadingIds.includes(todo.id) ? 'is-active' : ''}`}
+                  className={classNames('modal overlay', {
+                    'is-active': loadingIds.includes(todo.id),
+                  })}
                 >
-                  <div className="modal-background has-background-white-ter"></div>
-                  <div className="loader"></div>
+                  <div className="modal-background has-background-white-ter" />
+                  <div className="loader" />
                 </div>
               </div>
             ))}
 
-            {tempTodo && !todos.some(todo => todo.id === tempTodo.id) && (
+            {tempTodo && (
               <div
                 data-cy="Todo"
                 className="todo temp-item-enter temp-item-enter-active"
@@ -218,6 +219,15 @@ export const App: React.FC = () => {
                 <span data-cy="TodoTitle" className="todo__title">
                   {tempTodo.title}
                 </span>
+                <div
+                  data-cy="TodoLoader"
+                  className={classNames('modal overlay', {
+                    'is-active': isLoading,
+                  })}
+                >
+                  <div className="modal-background has-background-white-ter" />
+                  <div className="loader" />
+                </div>
               </div>
             )}
           </div>
