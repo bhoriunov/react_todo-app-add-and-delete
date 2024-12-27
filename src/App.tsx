@@ -83,17 +83,19 @@ export const App: React.FC = () => {
 
     try {
       const newTodoData = await client.post<Todo>('/todos', {
-        title: newTodo,
-        userId: USER_ID,
+        title: tempTodoItem.title,
+        userId: tempTodoItem.userId,
         completed: tempTodoItem.completed,
       });
 
+      setTempTodo(null);
       setTodos(prev => [...prev, newTodoData]);
+      setNewTodo('');
     } catch {
       setError('Unable to add todo');
-      setTempTodo(null);
       inputRef.current?.focus();
     } finally {
+      setTempTodo(null);
       setIsLoading(false);
     }
   };
@@ -157,13 +159,14 @@ export const App: React.FC = () => {
 
         <section className="todoapp__main" data-cy="TodoList">
           <div>
-            {filteredTodos.map(todo => (
+            {[...filteredTodos, tempTodo].filter(Boolean).map(todo => (
               <div
                 key={todo.id}
                 data-cy="Todo"
                 className={classNames('todo', {
                   completed: todo.completed,
-                  loading: loadingIds.includes(todo.id),
+                  loading:
+                    loadingIds.includes(todo.id) || todo.id === tempTodo?.id,
                 })}
               >
                 <label className="todo__status-label">
@@ -172,7 +175,9 @@ export const App: React.FC = () => {
                     type="checkbox"
                     className="todo__status"
                     checked={todo.completed}
-                    disabled={loadingIds.includes(todo.id)}
+                    disabled={
+                      todo.id === tempTodo?.id || loadingIds.includes(todo.id)
+                    }
                   />
                 </label>
 
@@ -180,20 +185,23 @@ export const App: React.FC = () => {
                   {todo.title}
                 </span>
 
-                <button
-                  type="button"
-                  className="todo__remove"
-                  data-cy="TodoDelete"
-                  onClick={() => handleDeleteTodo(todo.id)}
-                  disabled={loadingIds.includes(todo.id)}
-                >
-                  ×
-                </button>
+                {todo.id !== tempTodo?.id && (
+                  <button
+                    type="button"
+                    className="todo__remove"
+                    data-cy="TodoDelete"
+                    onClick={() => handleDeleteTodo(todo.id)}
+                    disabled={loadingIds.includes(todo.id)}
+                  >
+                    ×
+                  </button>
+                )}
 
                 <div
                   data-cy="TodoLoader"
                   className={classNames('modal overlay', {
-                    'is-active': loadingIds.includes(todo.id),
+                    'is-active':
+                      todo.id === tempTodo?.id || loadingIds.includes(todo.id),
                   })}
                 >
                   <div className="modal-background has-background-white-ter" />
@@ -201,30 +209,6 @@ export const App: React.FC = () => {
                 </div>
               </div>
             ))}
-
-            {tempTodo && (
-              <div
-                data-cy="Todo"
-                className="todo temp-item-enter temp-item-enter-active"
-              >
-                <label className="todo__status-label">
-                  <input type="checkbox" className="todo__status" disabled />
-                </label>
-
-                <span data-cy="TodoTitle" className="todo__title">
-                  {tempTodo.title}
-                </span>
-                <div
-                  data-cy="TodoLoader"
-                  className={classNames('modal overlay', {
-                    'is-active': isLoading,
-                  })}
-                >
-                  <div className="modal-background has-background-white-ter" />
-                  <div className="loader" />
-                </div>
-              </div>
-            )}
           </div>
         </section>
 
