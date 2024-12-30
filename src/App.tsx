@@ -1,7 +1,7 @@
 /* eslint-disable max-len */
 /* eslint-disable jsx-a11y/label-has-associated-control */
 /* eslint-disable jsx-a11y/control-has-associated-label */
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { UserWarning } from './UserWarning';
 import { getTodos, USER_ID } from './api/todos';
 import { Todo } from './types/Todo';
@@ -59,46 +59,48 @@ export const App: React.FC = () => {
     return true;
   });
 
-  const handleAddTodo = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+  const handleAddTodo = useCallback(
+    async (event: React.FormEvent<HTMLFormElement>) => {
+      event.preventDefault();
 
-    if (!newTodo.trim()) {
-      setError('Title should not be empty');
-      inputRef.current?.focus();
+      if (!newTodo.trim()) {
+        setError('Title should not be empty');
+        inputRef.current?.focus();
 
-      return;
-    }
+        return;
+      }
 
-    const tempId = Date.now();
-    const tempTodoItem: Todo = {
-      id: tempId,
-      title: newTodo.trim(),
-      completed: false,
-      userId: USER_ID,
-    };
+      const tempId = Date.now();
+      const tempTodoItem: Todo = {
+        id: tempId,
+        title: newTodo.trim(),
+        completed: false,
+        userId: USER_ID,
+      };
 
-    setTempTodo(tempTodoItem);
-    setNewTodo('');
-    setIsLoading(true);
+      setTempTodo(tempTodoItem);
+      setIsLoading(true);
 
-    try {
-      const newTodoData = await client.post<Todo>('/todos', {
-        title: tempTodoItem.title,
-        userId: tempTodoItem.userId,
-        completed: tempTodoItem.completed,
-      });
+      try {
+        const newTodoData = await client.post<Todo>('/todos', {
+          title: tempTodoItem.title,
+          userId: tempTodoItem.userId,
+          completed: tempTodoItem.completed,
+        });
 
-      setTempTodo(null);
-      setTodos(prev => [...prev, newTodoData]);
-      setNewTodo('');
-    } catch {
-      setError('Unable to add todo');
-      inputRef.current?.focus();
-    } finally {
-      setTempTodo(null);
-      setIsLoading(false);
-    }
-  };
+        setTempTodo(null);
+        setTodos(prev => [...prev, newTodoData]);
+        setNewTodo('');
+      } catch {
+        setError('Unable to add todo');
+      } finally {
+        setTempTodo(null);
+        setIsLoading(false);
+        inputRef.current?.focus();
+      }
+    },
+    [newTodo, todos]
+  );
 
   const handleDeleteTodo = async (todoId: number) => {
     setLoadingIds(prev => [...prev, todoId]);
@@ -135,6 +137,12 @@ export const App: React.FC = () => {
 
   const completedTodosCount = todos.filter(todo => todo.completed).length;
   const activeTodosCount = todos.filter(todo => !todo.completed).length;
+
+  useEffect((): void => {
+    if (inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [handleAddTodo]);
 
   return (
     <div className="todoapp">
