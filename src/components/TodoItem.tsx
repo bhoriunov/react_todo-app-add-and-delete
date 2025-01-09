@@ -24,15 +24,17 @@ export const TodoItem: React.FC<TodoItemProps> = ({
         loading: loadingIds.includes(todo.id) || todo.id === tempTodo?.id,
       })}
     >
-      <label className="todo__status-label">
-        <input
-          data-cy="TodoStatus"
-          type="checkbox"
-          className="todo__status"
-          checked={todo.completed}
-          disabled={todo.id === tempTodo?.id || loadingIds.includes(todo.id)}
-        />
+      <label className="todo__status-label" htmlFor="todo-status">
+        Status
       </label>
+      <input
+        data-cy="TodoStatus"
+        type="checkbox"
+        id="todo-status"
+        className="todo__status"
+        checked={todo.completed}
+        disabled={todo.id === tempTodo?.id || loadingIds.includes(todo.id)}
+      />
 
       <span data-cy="TodoTitle" className="todo__title">
         {todo.title}

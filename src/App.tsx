@@ -20,6 +20,12 @@ export const App: React.FC = () => {
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
+    if (inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [todos, error]);
+
+  useEffect(() => {
     const fetchTodos = async () => {
       setError(null);
 
@@ -88,12 +94,15 @@ export const App: React.FC = () => {
         setTempTodo(null);
         setTodos(prev => [...prev, newTodoData]);
         setNewTodo('');
+        if (inputRef.current) {
+          inputRef.current.focus();
+        }
       } catch {
         setError('Unable to add a todo');
       } finally {
         setTempTodo(null);
         setIsLoading(false);
-        inputRef.current?.focus();
+        // inputRef.current?.focus();
       }
     },
     [newTodo],
@@ -151,11 +160,11 @@ export const App: React.FC = () => {
   const completedTodosCount = todos.filter(todo => todo.completed).length;
   const activeTodosCount = todos.filter(todo => !todo.completed).length;
 
-  useEffect((): void => {
-    const timer = setTimeout(() => inputRef.current?.focus(), 0);
+  //useEffect((): void => {
+  //  const timer = setTimeout(() => inputRef.current?.focus(), 0);
 
-    return () => clearTimeout(timer);
-  }, []);
+  //  return () => clearTimeout(timer);
+  //}, []);
 
   if (!USER_ID) {
     return <UserWarning />;
@@ -171,6 +180,7 @@ export const App: React.FC = () => {
           setNewTodo={setNewTodo}
           handleAddTodo={handleAddTodo}
           isLoading={isLoading}
+          inputRef={inputRef}
         />
 
         <TodoList
